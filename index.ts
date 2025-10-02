@@ -74,10 +74,10 @@ export default function rollupImportWithVersion() {
           if (node.type === 'ImportDeclaration') {
             const { source, start, end } = node
             let { value } = source
-            // 找到需要外部化的依赖，将其替换
-            const replaceValue = `${value}@${pkgVersion.get(value)}`
 
             if (!pkgVersion.has(value)) return
+            // 找到需要外部化的依赖，将其替换
+            const replaceValue = `${value}@${pkgVersion.get(value)}`
 
             source.value = replaceValue
             source.raw = `'${replaceValue}'`
@@ -96,6 +96,8 @@ export default function rollupImportWithVersion() {
 
         data.code = magicString.toString()
       })
+
+      console.log('dir', options)
     },
   }
 }
