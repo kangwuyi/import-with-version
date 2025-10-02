@@ -37,6 +37,7 @@ export default function rollupImportWithVersion() {
       )
 
       const pkgVersion = new Map()
+      const realPkgVersion = new Map()
 
       await Promise.all(
         Object.keys(cup).map(async (dep) => {
@@ -76,6 +77,7 @@ export default function rollupImportWithVersion() {
             let { value } = source
 
             if (!pkgVersion.has(value)) return
+
             // 找到需要外部化的依赖，将其替换
             const replaceValue = `${value}@${pkgVersion.get(value)}`
 
@@ -91,13 +93,20 @@ export default function rollupImportWithVersion() {
             if (!format?.code) return
 
             magicString.overwrite(start, end, format.code)
+
+            realPkgVersion.set(replaceValue, `https://esm.sh/${replaceValue}`)
           }
         })
 
         data.code = magicString.toString()
       })
 
-      console.log('dir', options)
+      if (options?.dir && realPkgVersion.size) {
+        await fs.writeJSONSync(
+          path.join(options.dir, 'importmap.json'),
+          Object.fromEntries(realPkgVersion),
+        )
+      }
     },
   }
 }
