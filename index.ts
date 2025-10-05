@@ -52,7 +52,26 @@ export default function rollupImportWithVersion() {
             if (typeof versions === 'string') latest = versions
             else latest = versions.pop()
 
+            // format eq: "vue": "3.5.22",
             if (latest) pkgVersion.set(dep, latest)
+            // ------ extra
+            const depMatcher = new RegExp(`^@athenaapp(?:/.+)?$`)
+            if (!depMatcher.test(dep)) return
+
+            const depPkgFilePath = path.join(process.cwd(), 'node_modules', dep, 'package.json')
+            if (!fs.existsSync(depPkgFilePath)) return
+
+            const depPkg = await fs.readJSON(depPkgFilePath)
+            if (!depPkg?.importmap) return
+
+            const importmapPath = path.join(process.cwd(), 'node_modules', dep, depPkg.importmap)
+            if (!fs.existsSync(importmapPath)) return
+
+            const depImportmap = await fs.readJSON(importmapPath)
+            Object.entries(depImportmap).map((_) => {
+              // format eq: "vue@3.5.22": "https://esm.sh/vue@3.5.22",
+              realPkgVersion.set(_[0], _[1])
+            })
           } catch (err) {
             console.log(err)
           }
