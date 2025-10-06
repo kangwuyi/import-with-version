@@ -1,6 +1,6 @@
 {
   "name": "import-with-version",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "dist/import-with-version.js",
   "module": "dist/import-with-version.mjs",
