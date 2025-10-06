@@ -17,9 +17,10 @@ import { execSync } from 'node:child_process'
 
 interface TPluginOptions {
   schema: object
+  external: string[]
 }
 
-export default function rollupImportWithVersion(pluginOptions: Partial<TPluginOptions> = {}) {
+export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
   return {
     name: 'import-with-version',
     async generateBundle(context: NormalizedOutputOptions, bundle: OutputBundle) {
@@ -34,7 +35,7 @@ export default function rollupImportWithVersion(pluginOptions: Partial<TPluginOp
         await fs.writeJSONSync(path.join(context.dir, 'schema.json'), pluginOptions.schema)
       }
 
-      const externals = Object.keys(context?.globals || {})
+      const externals = pluginOptions.external
 
       if (!externals.length) return
 
