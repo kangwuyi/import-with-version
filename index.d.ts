@@ -1,3 +1,8 @@
 import type { OutputPlugin } from 'rollup'
 
-export default function rollupImportWithVersion(): OutputPlugin
+export interface TPluginOptions {
+  schema: object
+  external: string[]
+}
+
+export default function rollupImportWithVersion(pluginOptions: TPluginOptions): OutputPlugin

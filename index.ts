@@ -14,11 +14,7 @@ import MagicString from 'magic-string'
 import path from 'node:path'
 import fs from 'fs-extra'
 import { execSync } from 'node:child_process'
-
-interface TPluginOptions {
-  schema: object
-  external: string[]
-}
+import { type TPluginOptions } from './index.d'
 
 export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
   return {
