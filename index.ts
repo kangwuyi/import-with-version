@@ -17,8 +17,29 @@ import { execSync } from 'node:child_process'
 import { type TPluginOptions } from './index.d'
 
 export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
+  const externals = new Set<string>()
+
   return {
     name: 'import-with-version',
+    options: (opts) => {
+      let external = opts.external || []
+
+      // 过滤
+      if (typeof external === 'function') {
+        // const old = external
+        // external = (source, importer, isResolved) => {
+        //   // todo
+        //   return old(source, importer, isResolved)
+        // }
+      } else {
+        if (!Array.isArray(external)) {
+          external = [external]
+        }
+        external.filter((_) => !(_ instanceof RegExp)).map((_) => externals.add(_))
+      }
+
+      return opts
+    },
     async generateBundle(context: NormalizedOutputOptions, bundle: OutputBundle) {
       const pkgFilePath = path.join(process.cwd(), `package.json`)
 
@@ -31,9 +52,7 @@ export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
         await fs.writeJSONSync(path.join(context.dir, 'schema.json'), pluginOptions.schema)
       }
 
-      const externals = pluginOptions.external
-
-      if (!externals.length) return
+      if (!externals.size) return
 
       const pkg = await fs.readJSON(pkgFilePath)
 
@@ -45,7 +64,7 @@ export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
         pkg.peerDependencies,
       )
 
-      const cup = externals.reduce(
+      const cup = Array.from(externals).reduce(
         (o, k) => (deps[k] ? Object.assign(o, { [k]: deps[k] }) : o),
         {} as Record<string, string>,
       )
