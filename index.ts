@@ -35,7 +35,7 @@ export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
         if (!Array.isArray(external)) {
           external = [external]
         }
-        external.filter((_) => !(_ instanceof RegExp)).map((_) => externals.add(_))
+        ;(external.filter((_) => !(_ instanceof RegExp)) as string[]).map((_) => externals.add(_))
       }
 
       return opts
