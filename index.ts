@@ -1,4 +1,12 @@
-import type { OutputOptions, OutputBundle, OutputChunk } from 'rollup'
+import type {
+  OutputOptions,
+  OutputBundle,
+  OutputChunk,
+  Plugin,
+  NormalizedOutputOptions,
+  PluginContext,
+  InputPluginOption,
+} from 'rollup'
 import { parse } from 'acorn'
 import { generate } from 'escodegen'
 import { minify_sync } from 'terser'
@@ -7,19 +15,28 @@ import path from 'node:path'
 import fs from 'fs-extra'
 import { execSync } from 'node:child_process'
 
-export default function rollupImportWithVersion() {
+interface TPluginOptions {
+  schema: object
+}
+
+export default function rollupImportWithVersion(pluginOptions: Partial<TPluginOptions> = {}) {
   return {
     name: 'import-with-version',
-    async generateBundle(options: OutputOptions, bundle: OutputBundle) {
-      const externals = Object.keys(options?.globals || {})
-
-      if (!externals.length) return
-
+    async generateBundle(context: NormalizedOutputOptions, bundle: OutputBundle) {
       const pkgFilePath = path.join(process.cwd(), `package.json`)
 
       if (!fs.existsSync(pkgFilePath)) {
         throw new Error(`The package.json file is specified that (${pkgFilePath}) does not exist.`)
       }
+
+      // extra schema file
+      if (pluginOptions?.schema && context?.dir) {
+        await fs.writeJSONSync(path.join(context.dir, 'schema.json'), pluginOptions.schema)
+      }
+
+      const externals = Object.keys(context?.globals || {})
+
+      if (!externals.length) return
 
       const pkg = await fs.readJSON(pkgFilePath)
 
@@ -54,7 +71,7 @@ export default function rollupImportWithVersion() {
 
             // format eq: "vue": "3.5.22",
             if (latest) pkgVersion.set(dep, latest)
-            // ------ extra
+            // ------ extra dep importmap
             const depMatcher = new RegExp(`^@athenaapp(?:/.+)?$`)
             if (!depMatcher.test(dep)) return
 
@@ -62,12 +79,19 @@ export default function rollupImportWithVersion() {
             if (!fs.existsSync(depPkgFilePath)) return
 
             const depPkg = await fs.readJSON(depPkgFilePath)
-            if (!depPkg?.importmap) return
+            if (!depPkg?.componentConfig?.importmap) return
 
-            const importmapPath = path.join(process.cwd(), 'node_modules', dep, depPkg.importmap)
+            const importmapPath = path.join(
+              process.cwd(),
+              'node_modules',
+              dep,
+              depPkg.componentConfig.importmap,
+            )
+
             if (!fs.existsSync(importmapPath)) return
 
             const depImportmap = await fs.readJSON(importmapPath)
+
             Object.entries(depImportmap).map((_) => {
               // format eq: "vue@3.5.22": "https://esm.sh/vue@3.5.22",
               realPkgVersion.set(_[0], _[1])
@@ -120,12 +144,12 @@ export default function rollupImportWithVersion() {
         data.code = magicString.toString()
       })
 
-      if (options?.dir && realPkgVersion.size) {
+      if (context?.dir && realPkgVersion.size) {
         await fs.writeJSONSync(
-          path.join(options.dir, 'importmap.json'),
+          path.join(context.dir, 'importmap.json'),
           Object.fromEntries(realPkgVersion),
         )
       }
     },
-  }
+  } satisfies Plugin
 }
