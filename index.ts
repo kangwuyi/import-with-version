@@ -18,6 +18,7 @@ import { type TPluginOptions } from './index.d'
 
 export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
   const externals = new Set<string>()
+  const realPkgVersion = new Map()
 
   return {
     name: 'import-with-version',
@@ -70,7 +71,6 @@ export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
       )
 
       const pkgVersion = new Map()
-      const realPkgVersion = new Map()
 
       await Promise.all(
         Object.keys(cup).map(async (dep) => {
@@ -160,6 +160,7 @@ export default function rollupImportWithVersion(pluginOptions: TPluginOptions) {
         data.code = magicString.toString()
       })
 
+      // 重复写入，后续需要做判断，值写入一次，变化之后则再次写入（cjs 也可存在 import）
       if (context?.dir && realPkgVersion.size) {
         await fs.writeJSONSync(
           path.join(context.dir, 'importmap.json'),
