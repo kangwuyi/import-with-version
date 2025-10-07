@@ -1,7 +1,7 @@
 import { RollupOptions } from 'rollup'
 import typescript from '@rollup/plugin-typescript'
 
-const name = 'import-with-version'
+const name = 'rollup-import-with-version'
 const config: RollupOptions = {
   input: 'index.ts',
   output: [

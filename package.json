@@ -1,9 +1,9 @@
 {
-  "name": "import-with-version",
+  "name": "rollup-import-with-version",
   "version": "0.0.7",
   "description": "",
-  "main": "dist/import-with-version.js",
-  "module": "dist/import-with-version.mjs",
+  "main": "dist/rollup-import-with-version.js",
+  "module": "dist/rollup-import-with-version.mjs",
   "types": "index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kangwuyi/import-with-version.git"
+    "url": "git+https://github.com/kangwuyi/rollup-import-with-version.git"
   },
   "author": "kwy",
   "license": "MIT",
@@ -27,9 +27,9 @@
     "registry": "https://registry.npmjs.org/"
   },
   "bugs": {
-    "url": "https://github.com/kangwuyi/import-with-version/issues"
+    "url": "https://github.com/kangwuyi/rollup-import-with-version/issues"
   },
-  "homepage": "https://github.com/kangwuyi/import-with-version#readme",
+  "homepage": "https://github.com/kangwuyi/rollup-import-with-version#readme",
   "devDependencies": {
     "@jest/globals": "^30.2.0",
     "@rollup/plugin-typescript": "^12.1.4",
